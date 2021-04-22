@@ -7,99 +7,44 @@
     <title>Push Notification</title>
   </head>
   <body>
+    <input type="text" id="msg" />
+    <button type="button" onclick="sendMessage()">Send</button>
+
+    <script
+      src="https://code.jquery.com/jquery-3.6.0.min.js"
+      integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-notify/0.2.0/js/bootstrap-notify.min.js"
+      integrity="sha512-vCgNjt5lPWUyLz/tC5GbiUanXtLX1tlPXVFaX5KAQrUHjwPcCwwPOLn34YBFqws7a7+62h7FRvQ1T0i/yFqANA=="
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
     <script>
       const socket = io();
-      /**
-       * Set Default Socket For Show Notification
-       * @param {type} data
-       * @returns {undefined}
-       */
-      socket.on("show_notification", function (data) {
-        showDesktopNotification(data.title, data.message, data.icon);
+      toastr.options = {
+        timeOut: 7000,
+        positionClass: "toast-bottom-right",
+        extendedTimeOut: 0,
+        fadeOut: 0,
+        fadeIn: 0,
+        showDuration: 0,
+        hideDuration: 0,
+        debug: false,
+      };
+
+      socket.on("new-notification", (resp) => {
+        toastr.success(resp, "New notification");
       });
-      /**
-       * Set Notification Request
-       * @type type
-       */
-      function setNotification() {
-        showDesktopNotification(
-          "Lokesh",
-          "Desktop Notification..!",
-          "/index.jpeg"
-        );
-        sendNodeNotification(
-          "Lokesh",
-          "Browser Notification..!",
-          "/index.jpeg"
-        );
-      }
-      /**
-       * Check Browser Notification Permission
-       * @type window.Notification|Window.Notification|window.webkitNotification|Window.webkitNotification|Window.mozNotification|window.mozNotification
-       */
-      const Notification =
-        window.Notification ||
-        window.mozNotification ||
-        window.webkitNotification;
-      Notification.requestPermission(function (permission) {});
-      /**
-       * Request Browser Notification Permission
-       * @type Arguments
-       */
-      function requestNotificationPermissions() {
-        if (Notification.permission !== "denied") {
-          Notification.requestPermission(function (permission) {});
+
+      const sendMessage = () => {
+        let msg = document.getElementById("msg").value;
+        if (msg.trim() !== "") {
+          socket.emit("send-notification", msg);
         }
-      }
-      /**
-       * Show Desktop Notification If Notification Allow
-       * @param {type} title
-       * @param {type} message
-       * @param {type} icon
-       * @returns {undefined}
-       */
-      function showDesktopNotification(message, body, icon, sound, timeout) {
-        if (!timeout) {
-          timeout = 4000;
-        }
-        requestNotificationPermissions();
-        const instance = new Notification(message, {
-          body: body,
-          icon: icon,
-          sound: sound,
-        });
-        instance.onclick = function () {
-          // Something to do
-        };
-        instance.onerror = function () {
-          // Something to do
-        };
-        instance.onshow = function () {
-          // Something to do
-        };
-        instance.onclose = function () {
-          // Something to do
-        };
-        if (sound) {
-          instance.sound;
-        }
-        setTimeout(instance.close.bind(instance), timeout);
-        return false;
-      }
-      /**
-       * Send Node Notification
-       * @param {type} title
-       * @param {type} message
-       * @param {type} icon
-       * @returns {undefined}
-       */
-      function sendNodeNotification(title, message, icon) {
-        socket.emit("new_notification", {
-          message: message,
-          title: title,
-          icon: icon,
-        });
-      }
+      };
     </script>
   </body>
 </html>
